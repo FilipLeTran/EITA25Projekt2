@@ -4,6 +4,7 @@ import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 import java.security.KeyStore;
 import java.security.cert.*;
+import java.util.Scanner;
 
 /*
  * This example shows how to set up a key manager to perform client
@@ -32,18 +33,23 @@ public class Client {
             System.out.println("USAGE: java client host port");
             System.exit(-1);
         }
+        
+        System.out.println("Username: ");
+        Scanner scan = new Scanner(System.in);
+        String username = scan.nextLine();
+        System.out.println("Password: ");
+        char[] password = scan.nextLine().toCharArray();
 
         try { /* set up a key manager for client authentication */
             SSLSocketFactory factory = null;
             try {
-                char[] password = "password".toCharArray();
                 KeyStore ks = KeyStore.getInstance("JKS");
                 KeyStore ts = KeyStore.getInstance("JKS");
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
                 SSLContext ctx = SSLContext.getInstance("TLS");
-                ks.load(new FileInputStream("clientkeystore"), password);  // keystore password (storepass)
-				ts.load(new FileInputStream("clienttruststore"), password); // truststore password (storepass);
+                ks.load(new FileInputStream(username), password);  // keystore password (storepass)
+				ts.load(new FileInputStream("clienttruststore"), "password".toCharArray()); // truststore password (storepass);
 				kmf.init(ks, password); // user password (keypass)
 				tmf.init(ts); // keystore can be used as truststore here
 				ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
