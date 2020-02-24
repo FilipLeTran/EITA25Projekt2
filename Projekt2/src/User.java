@@ -11,4 +11,27 @@ public class User {
 				
 		
 	}
+	
+	
+	public String getUsername() {
+		return username;
+	}
+
+
+
+	public String getFullname() {
+		return fullname;
+	}
+
+
+
+	public Role getRole() {
+		return role;
+	}
+
+
+
+	public String toString() {
+		return username + ": " + fullname + ", " + role; 
+	}
 }

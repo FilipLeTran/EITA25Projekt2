@@ -1,16 +1,20 @@
 import java.io.*;
 import java.net.*;
 import java.security.KeyStore;
+import java.util.ArrayList;
+
 import javax.net.*;
 import javax.net.ssl.*;
 import javax.security.cert.X509Certificate;
 
 public class Server implements Runnable {
     private ServerSocket serverSocket = null;
+    private static ArrayList<User> connectedClients;
     private static int numConnectedClients = 0;
 
     public Server(ServerSocket ss) throws IOException {
         serverSocket = ss;
+        connectedClients = new ArrayList<>();
         newListener();
     }
 
@@ -21,40 +25,17 @@ public class Server implements Runnable {
             SSLSession session = socket.getSession();
             X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
             String subject = cert.getSubjectDN().getName();
-            String issuer = cert.getIssuerDN().getName();
-            String srl = cert.getSerialNumber().toString();
-            // username,Full Name,role
-            int firstMarker = subject.indexOf(',');
-            int secMarker = subject.lastIndexOf(',');
-            String username = subject.substring(0, firstMarker);
-            String fullname = subject.substring(firstMarker+1, secMarker);
-            String rolestr = subject.substring(secMarker+1, subject.length());
-            Role role;
-            switch(rolestr) {
-			case "patient":
-				role = Role.PATIENT;
-				break;
-			case "nurse":
-				role = Role.NURSE;
-				break;
-			case "doctor":
-				role = Role.DOCTOR;
-				break;
-			case "gov":
-				role = Role.GOV;
-				break;
-			default:
-				System.out.println("Could not find user_role in certificate.");
-				
-            User user = new User(username, fullname, role);
+            User user = initiateUser(subject);
+            if(user instanceof User) {
+            	connectedClients.add(user);
+            	numConnectedClients++;
+            } else {
+                System.out.println(numConnectedClients + " concurrent connection(s)\n");
+            	return;
+            }
      
-    	    numConnectedClients++;
             System.out.println("client connected");
-            System.out.println("client name (cert subject DN field): " + subject);
-            System.out.println("issuer name (cert issuer DN field): " + issuer);
-            System.out.println("serial number (cert serial number): " + srl);
-            
-            
+            System.out.println(user);
             
             System.out.println(numConnectedClients + " concurrent connection(s)\n");
 
@@ -76,7 +57,7 @@ public class Server implements Runnable {
 			out.close();
 			socket.close();
     	    numConnectedClients--;
-            System.out.println("client disconnected");
+            System.out.println(user.getUsername() + " disconnected");
             System.out.println(numConnectedClients + " concurrent connection(s)\n");
 		} catch (IOException e) {
             System.out.println("Client died: " + e.getMessage());
@@ -102,6 +83,39 @@ public class Server implements Runnable {
         } catch (IOException e) {
             System.out.println("Unable to start Server: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    private User initiateUser(String subject) {
+    	// username,Full Name,role
+    	try {
+	        int firstMarker = subject.indexOf(',');
+	        int secMarker = subject.lastIndexOf(',');
+	        String username = subject.substring(subject.indexOf('"')+1, firstMarker);
+	        String fullname = subject.substring(firstMarker+1, secMarker);
+	        String rolestr = subject.substring(secMarker+1, subject.length()); //fixa rätt index
+	        Role role;
+	        switch(rolestr) {
+				case "patient":
+					role = Role.PATIENT;
+					break;
+				case "nurse":
+					role = Role.NURSE;
+					break;
+				case "doctor":
+					role = Role.DOCTOR;
+					break;
+				case "gov":
+					role = Role.GOV;
+					break;
+				default:
+					role = null;
+					
+	        }
+	        return new User(username, fullname, role);
+    	} catch(Exception e){
+        	e.printStackTrace();
+        	return null;
         }
     }
 
