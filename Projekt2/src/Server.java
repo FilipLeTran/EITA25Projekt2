@@ -23,12 +23,39 @@ public class Server implements Runnable {
             String subject = cert.getSubjectDN().getName();
             String issuer = cert.getIssuerDN().getName();
             String srl = cert.getSerialNumber().toString();
+            // username,Full Name,role
+            int firstMarker = subject.indexOf(',');
+            int secMarker = subject.lastIndexOf(',');
+            String username = subject.substring(0, firstMarker);
+            String fullname = subject.substring(firstMarker+1, secMarker);
+            String rolestr = subject.substring(secMarker+1, subject.length());
+            Role role;
+            switch(rolestr) {
+			case "patient":
+				role = Role.PATIENT;
+				break;
+			case "nurse":
+				role = Role.NURSE;
+				break;
+			case "doctor":
+				role = Role.DOCTOR;
+				break;
+			case "gov":
+				role = Role.GOV;
+				break;
+			default:
+				System.out.println("Could not find user_role in certificate.");
+				
+            User user = new User(username, fullname, role);
+     
     	    numConnectedClients++;
             System.out.println("client connected");
             System.out.println("client name (cert subject DN field): " + subject);
             System.out.println("issuer name (cert issuer DN field): " + issuer);
             System.out.println("serial number (cert serial number): " + srl);
-
+            
+            
+            
             System.out.println(numConnectedClients + " concurrent connection(s)\n");
 
             PrintWriter out = null;
