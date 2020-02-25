@@ -34,8 +34,7 @@ public class Server implements Runnable {
             	return;
             }
      
-            System.out.println("client connected");
-            System.out.println(user);
+            System.out.println(user + " connected");
             
             System.out.println(numConnectedClients + " concurrent connection(s)\n");
 
@@ -93,7 +92,7 @@ public class Server implements Runnable {
 	        int secMarker = subject.lastIndexOf(',');
 	        String username = subject.substring(subject.indexOf('"')+1, firstMarker);
 	        String fullname = subject.substring(firstMarker+1, secMarker);
-	        String rolestr = subject.substring(secMarker+1, subject.length()); //fixa rätt index
+	        String rolestr = subject.substring(secMarker+1, subject.indexOf(",", secMarker+2)); //fixa rätt index
 	        Role role;
 	        switch(rolestr) {
 				case "patient":
