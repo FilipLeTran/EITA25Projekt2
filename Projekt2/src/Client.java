@@ -79,6 +79,7 @@ public class Client {
             BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println(in.readLine());
             String msg;
 			for (;;) {
                 System.out.print(">");
@@ -90,8 +91,9 @@ public class Client {
                 out.println(msg);
                 out.flush();
                 System.out.println("done");
-
-                System.out.println("received '" + in.readLine() + "' from server\n");
+                while(in.read() != -1) {
+                	System.out.println(in.readLine());
+                }
             }
             in.close();
 			out.close();

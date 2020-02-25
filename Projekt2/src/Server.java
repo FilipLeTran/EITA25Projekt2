@@ -17,6 +17,8 @@ public class Server implements Runnable {
     public Server(ServerSocket ss) throws IOException {
         serverSocket = ss;
         users = new HashMap<>();
+        users.put("Admin", new User("Admin", "Admin Admin", Role.ADMIN));
+        users.put("testare", new User("testare", "Jan Jansson", Role.ADMIN));
         records = new HashMap<>();
         newListener();
     }
@@ -28,34 +30,35 @@ public class Server implements Runnable {
             SSLSession session = socket.getSession();
             X509Certificate cert = (X509Certificate)session.getPeerCertificateChain()[0];
             String subject = cert.getSubjectDN().getName();
-            User user = initiateUser(subject);
-            if(user instanceof User) {
-            	if(!users.containsKey(user.getUsername())) {
-            		users.put(user.getUsername(), user);
-            	}
+            User user = getUser(subject.substring(subject.indexOf('"')+1, subject.indexOf(",")));
+            Boolean killsession = false;
+            if(user != null) {
             	numConnectedClients++;
-            } else {
+            	System.out.println(user + " connected");
                 System.out.println(numConnectedClients + " concurrent connection(s)\n");
-            	return;
+            } else {
+            	System.out.println("Unauthorized user connected to server but was dropped.");
+                System.out.println(numConnectedClients + " concurrent connection(s)\n");
+                killsession = true;
             }
      
-            System.out.println(user + " connected");
+           
             
-            System.out.println(numConnectedClients + " concurrent connection(s)\n");
-
             PrintWriter out = null;
             BufferedReader in = null;
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            String clientMsg = null;
-            while ((clientMsg = in.readLine()) != null) {
-			    String rev = new StringBuilder(clientMsg).reverse().toString();
-                System.out.println("received '" + clientMsg + "' from client");
-                System.out.print("sending '" + rev + "' to client...");
-				out.println(rev);
-				out.flush();
-                System.out.println("done\n");
+            if(killsession) {
+            	out.println("Connection dropped. You have not yet been added to the server whitelist.");
+            	out.flush();
+            	return;
+            } else {
+            	out.println("Welcome, " + user.getUsername() + "!");
+            }
+            String clientInput = null;
+            while ((clientInput = in.readLine()) != null) {
+					out.println(OperationHandler.handleInput(user, clientInput));
+					out.flush();
 			}
 			in.close();
 			out.close();
@@ -90,40 +93,14 @@ public class Server implements Runnable {
         }
     }
     
-    private User initiateUser(String subject) {
-    	// username,Full Name,role
-    	try {
-	        int firstMarker = subject.indexOf(',');
-	        int secMarker = subject.indexOf(',', firstMarker+1);
-	        String username = subject.substring(subject.indexOf('"')+1, firstMarker);
-	        String fullname = subject.substring(firstMarker+1, secMarker);
-	        String rolestr = subject.substring(secMarker+1, subject.indexOf('"', secMarker+1)); //fixa rätt index
-	        Role role;
-	        switch(rolestr) {
-				case "patient":
-					role = Role.PATIENT;
-					break;
-				case "nurse":
-					role = Role.NURSE;
-					break;
-				case "doctor":
-					role = Role.DOCTOR;
-					break;
-				case "gov":
-					role = Role.GOV;
-					break;
-				default:
-					role = null;
-					
-	        }
-	        return new User(username, fullname, role);
-    	} catch(Exception e){
-        	e.printStackTrace();
-        	return null;
-        }
+    
+    
+    public static User getUser(String username) {
+    	if(users.containsKey(username)) {
+    		return users.get(username);
+    	}
+    	return null;
     }
-    
-    
 
     private static ServerSocketFactory getServerSocketFactory(String type) {
         if (type.equals("TLS")) {

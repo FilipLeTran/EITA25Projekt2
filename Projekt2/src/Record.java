@@ -13,6 +13,14 @@ public class Record {
 		this.nurse = nurse;
 		this.division = division;
 	}
+	
+	public Record(User doctor, User patient, User nurse, String data){
+		this.doctor = doctor;
+		this.patient = patient;
+		this.nurse = nurse;
+		this.division = division;
+		this.data = data;
+	}
 
 	public String getData(){
 		return data;		
@@ -32,6 +40,8 @@ public class Record {
 
 	public String getPermissions(User user){
 		switch(user.getRole()){
+			case ADMIN:
+				return "rw";
 			case GOV:
 				return "rw";
 			case DOCTOR:
@@ -52,6 +62,10 @@ public class Record {
 			default:
 				return "";
 		}
+	}
+	
+	public String toString() {
+		return "Patient: " + patient.getFullname() +"\nDoctor: " + doctor.getFullname() + "\nNurse: " + nurse.getFullname() + "\n" + data;
 	}
 
 }
