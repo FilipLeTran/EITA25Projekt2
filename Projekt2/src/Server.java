@@ -10,13 +10,14 @@ import javax.security.cert.X509Certificate;
 
 public class Server implements Runnable {
     private ServerSocket serverSocket = null;
-    private static ArrayList<User> connectedClients;
-    private static HashMap<String, Record> records;
+    public static HashMap<String, User> users;
+    public static HashMap<String, Record> records;
     private static int numConnectedClients = 0;
 
     public Server(ServerSocket ss) throws IOException {
         serverSocket = ss;
-        connectedClients = new ArrayList<>();
+        users = new HashMap<>();
+        records = new HashMap<>();
         newListener();
     }
 
@@ -29,7 +30,9 @@ public class Server implements Runnable {
             String subject = cert.getSubjectDN().getName();
             User user = initiateUser(subject);
             if(user instanceof User) {
-            	connectedClients.add(user);
+            	if(!users.containsKey(user.getUsername())) {
+            		users.put(user.getUsername(), user);
+            	}
             	numConnectedClients++;
             } else {
                 System.out.println(numConnectedClients + " concurrent connection(s)\n");
@@ -120,21 +123,7 @@ public class Server implements Runnable {
         }
     }
     
-    private boolean recordAction(User user, String recordname, String action) {
-    	Record record = records.get(recordname);
-    	String perm = record.getPermissions(user);
-    	switch(action) {
-	    	case "open":
-	    		return true;
-	    	case "remove":
-	    		return true;
-	    	default:
-	    		System.out.println("Unspecified action");
-	    		return false;
-    	}
-    }
     
-    private boolean addRecord()
 
     private static ServerSocketFactory getServerSocketFactory(String type) {
         if (type.equals("TLS")) {
