@@ -11,24 +11,21 @@ public class User {
 		this.role = role;		
 	}
 	
-	
 	public String getUsername() {
 		return username;
 	}
-
-
 
 	public String getFullname() {
 		return fullname;
 	}
 
-
-
 	public Role getRole() {
 		return role;
 	}
-
-
+	
+	public Division getDivision() {
+		return division;
+	}
 
 	public String toString() {
 		return username + ": " + fullname + ", " + role; 

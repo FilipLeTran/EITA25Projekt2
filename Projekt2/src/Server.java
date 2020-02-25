@@ -10,6 +10,7 @@ import javax.security.cert.X509Certificate;
 public class Server implements Runnable {
     private ServerSocket serverSocket = null;
     private static ArrayList<User> connectedClients;
+    private static ArrayList<Record> records; 
     private static int numConnectedClients = 0;
 
     public Server(ServerSocket ss) throws IOException {
@@ -89,10 +90,10 @@ public class Server implements Runnable {
     	// username,Full Name,role
     	try {
 	        int firstMarker = subject.indexOf(',');
-	        int secMarker = subject.lastIndexOf(',');
+	        int secMarker = subject.indexOf(',', firstMarker+1);
 	        String username = subject.substring(subject.indexOf('"')+1, firstMarker);
 	        String fullname = subject.substring(firstMarker+1, secMarker);
-	        String rolestr = subject.substring(secMarker+1, subject.indexOf(",", secMarker+2)); //fixa rätt index
+	        String rolestr = subject.substring(secMarker+1, subject.indexOf('"', secMarker+1)); //fixa rätt index
 	        Role role;
 	        switch(rolestr) {
 				case "patient":
