@@ -30,26 +30,27 @@ public class Record {
 		data = data + "\n" + newData;
 	}
 
-	public String checkPermissions(User user){
+	public String getPermissions(User user){
 		switch(user.getRole()){
 			case GOV:
 				return "rw";
-				break;
 			case DOCTOR:
 				if(user.getDivision() == division){
 					return "rw";
 				}
-				break;
+				return "";
 			case NURSE:
-				if(user.getUsername().equals(nurse.getUsername());{
+				if(user.getUsername().equals(nurse.getUsername())){
 					return "rw";
 				}
-				break;
+				return "";
 			case PATIENT:
 				if(user.getUsername().equals(patient.getUsername())){
 					return "r";
 				}
-				break;
+				return "";
+			default:
+				return "";
 		}
 	}
 

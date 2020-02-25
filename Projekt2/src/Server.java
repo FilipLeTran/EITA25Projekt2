@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.net.*;
 import javax.net.ssl.*;
@@ -10,7 +11,7 @@ import javax.security.cert.X509Certificate;
 public class Server implements Runnable {
     private ServerSocket serverSocket = null;
     private static ArrayList<User> connectedClients;
-    private static ArrayList<Record> records; 
+    private static HashMap<String, Record> records;
     private static int numConnectedClients = 0;
 
     public Server(ServerSocket ss) throws IOException {
@@ -117,6 +118,20 @@ public class Server implements Runnable {
         	e.printStackTrace();
         	return null;
         }
+    }
+    
+    private boolean recordAction(User user, String recordname, String action) {
+    	Record record = records.get(recordname);
+    	String perm = record.getPermissions(user);
+    	switch(action) {
+	    	case "open":
+	    		return true;
+	    	case "remove":
+	    		return true;
+	    	default:
+	    		System.out.println("Unspecified action");
+	    		return false;
+    	}
     }
 
     private static ServerSocketFactory getServerSocketFactory(String type) {
