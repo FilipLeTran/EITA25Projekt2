@@ -133,6 +133,8 @@ public class Server implements Runnable {
 	    		return false;
     	}
     }
+    
+    private boolean addRecord()
 
     private static ServerSocketFactory getServerSocketFactory(String type) {
         if (type.equals("TLS")) {
