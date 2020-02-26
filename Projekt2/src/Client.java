@@ -91,8 +91,12 @@ public class Client {
                 out.println(msg);
                 out.flush();
                 System.out.println("done");
-                while(in.read() != -1) {
-                	System.out.println(in.readLine());
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (line.isEmpty()) {
+                        break;
+                    }
+                    System.out.println(line);
                 }
             }
             in.close();

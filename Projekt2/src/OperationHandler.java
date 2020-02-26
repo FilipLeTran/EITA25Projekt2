@@ -1,32 +1,28 @@
 
 public class OperationHandler {
 	
-	
+	//Bestämmer vilken sorts operation som användaren skickat in via klienten.
+	//Returnerar "Unspecified operation" om operationen inte finns.
 	public static String handleInput(User user, String input) {
     	try {
     		String[] operations = input.split(" ");
-    		for(String s : operations) {
-    			System.out.println(s);
-    		}
 	    	switch(operations[0]) {
 		    	case "open":
-		    		return "Failed open operation";
+		    		return openRecord(user, operations[1]);
 		    	case "remove":
 		    		return "Failed remove operation";
 		    	case "add":
 		    		switch(operations[1]) {
 		    			case "user":
 		    				if(user.getRole() == Role.ADMIN) {
-		    					if(addUser(input.substring(input.indexOf(operations[1])+1))) {
-		    						return "User added succesfully";
-		    					}
+		    					return addUser(input.substring(input.indexOf(operations[2])));
 		    				}
+		    				return "Access denied";
 		    			case "record":
 		    				if(user.getRole() == Role.DOCTOR || user.getRole() == Role.ADMIN) {
-		    					if(addRecord(user, operations[2], input.substring(input.indexOf(operations[2])+1))) {
-		    						return "Record added successfully.";
-		    					}
+		    					return addRecord(user, operations[2], input.substring(input.indexOf(operations[3])));
 		    				}
+		    				return "Access denied";
 		    		}
 		    	case "list":
 		    		switch(operations[1]) {
@@ -38,30 +34,57 @@ public class OperationHandler {
 	    	}
     	} catch(Exception e) {
     		e.printStackTrace();
-    		return "Error: " + e.getCause();
+    		return "Input error.";
     	}
     	
     }
     
 	// TODO fixa så att denna metod kan hantera data utan ett textfält.
-    private static boolean addRecord(User user, String recordname, String data) {
+	// Skriver över andra records??
+    private static String addRecord(User user, String recordname, String data) {
     	try {
     		String[] inputs = data.split(" ");
 	    	User patient = Server.getUser(inputs[0]);
 	    	User nurse = Server.getUser(inputs[1]);
+	    	if(patient == null || nurse == null) {
+	    		return "User not found.";
+	    	}
 	    	String text = inputs[2];
 	    	Server.records.put(recordname, new Record(user, patient, nurse, text)); 
-	    	return true;
+	    	return "Record added successfully.";
     	} catch(Exception e) {
     		e.printStackTrace();
-    		return false;
+    		return "Input error.";
     	}
     }
     
-    private static boolean addUser(String data) {
+    private static String openRecord(User user, String recordname) {
+    	Record record = Server.records.get(recordname);
+    	String recordString = "No record found.";
+    	if(record.getPermissions(user).contains("r")) {
+    		recordString = "-----------------------------------\n";
+			recordString+=record.toString() + "-----------------------------------\n";
+		}
+    	return recordString;
+    }
+    
+    private static String listRecords(User user) {
+    	String recordString = "-----------------------------------\n";
+    	for(Record record : Server.records.values()) {
+    		if(record.getPermissions(user).contains("r")) {
+    			recordString+=record.toString() + "-----------------------------------\n";
+    		}
+    	}
+    	return recordString;
+    }
+    
+    private static String addUser(String data) {
     	// username Lastname,Firstname role
     	try {
     		String[] inputs = data.split(" ");
+    		for(String s : inputs) {
+    			System.out.println(s);
+    		}
 	        String username = inputs[0];
 	        String fullname = inputs[1];
 	        String rolestr = inputs[2];
@@ -83,24 +106,14 @@ public class OperationHandler {
 					role = Role.ADMIN;
 					break;
 				default:
-					return false;
+					return "Please enter a valid role.";
 					
 	        }
 	        Server.users.put(username, new User(username, fullname, role));
-	        return true;
+	        return "User added successfully.";
     	} catch(Exception e){
         	e.printStackTrace();
-        	return false;
+        	return "Input error.";
         }
-    }
-    
-    private static String listRecords(User user) {
-    	String recordString = "-----------------------------------\n";
-    	for(Record record : Server.records.values()) {
-    		if(record.getPermissions(user).contains("r")) {
-    			recordString+=record.toString() + "-----------------------------------\n";
-    		}
-    	}
-    	return recordString;
     }
 }

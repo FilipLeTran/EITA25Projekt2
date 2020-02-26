@@ -65,7 +65,7 @@ public class Record {
 	}
 	
 	public String toString() {
-		return "Patient: " + patient.getFullname() +"\nDoctor: " + doctor.getFullname() + "\nNurse: " + nurse.getFullname() + "\n" + data;
+		return "Patient: " + patient.getFullname() +"\nDoctor: " + doctor.getFullname() + "\nNurse: " + nurse.getFullname() + "\n" + data + "\n";
 	}
 
 }

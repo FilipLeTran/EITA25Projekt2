@@ -57,7 +57,7 @@ public class Server implements Runnable {
             }
             String clientInput = null;
             while ((clientInput = in.readLine()) != null) {
-					out.println(OperationHandler.handleInput(user, clientInput));
+					out.println(OperationHandler.handleInput(user, clientInput) + "\n");
 					out.flush();
 			}
 			in.close();
