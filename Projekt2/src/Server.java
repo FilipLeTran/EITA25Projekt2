@@ -17,9 +17,13 @@ public class Server implements Runnable {
     public Server(ServerSocket ss) throws IOException {
         serverSocket = ss;
         users = new HashMap<>();
-        users.put("Admin", new User("Admin", "Admin Admin", Role.ADMIN));
-        users.put("testare", new User("testare", "Jan Jansson", Role.ADMIN));
         records = new HashMap<>();
+        users.put("Admin", new User("Admin", "Admin Admin", Role.ADMIN));
+        users.put("nurse", new User("nurse", "Eva Olofsson", Role.NURSE));
+        users.put("patient", new User("patient", "Rolf", Role.PATIENT));
+        users.put("testare", new User("testare", "Jan Jansson", Role.PATIENT));
+        records.put("r1", new Record(users.get("Admin"), users.get("patient"), users.get("nurse"), "Bruten tumme"));
+        records.put("r2", new Record(users.get("Admin"), users.get("testare"), users.get("nurse"), "Influense"));
         newListener();
     }
 
@@ -41,8 +45,6 @@ public class Server implements Runnable {
                 System.out.println(numConnectedClients + " concurrent connection(s)\n");
                 killsession = true;
             }
-     
-           
             
             PrintWriter out = null;
             BufferedReader in = null;
@@ -57,7 +59,7 @@ public class Server implements Runnable {
             }
             String clientInput = null;
             while ((clientInput = in.readLine()) != null) {
-					out.println(OperationHandler.handleInput(user, clientInput) + "\n");
+					out.println(OperationHandler.handleInput(user, clientInput));
 					out.flush();
 			}
 			in.close();

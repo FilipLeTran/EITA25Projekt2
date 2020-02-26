@@ -81,7 +81,7 @@ public class Client {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println(in.readLine());
             String msg;
-			for (;;) {
+			while(true) {
                 System.out.print(">");
                 msg = read.readLine();
                 if (msg.equalsIgnoreCase("quit")) {
@@ -91,13 +91,10 @@ public class Client {
                 out.println(msg);
                 out.flush();
                 System.out.println("done");
-                String line;
-                while ((line = in.readLine()) != null) {
-                    if (line.isEmpty()) {
-                        break;
-                    }
-                    System.out.println(line);
-                }
+                System.out.println(in.readLine());
+                while(in.ready()) {
+                    System.out.println(in.readLine());
+               }
             }
             in.close();
 			out.close();

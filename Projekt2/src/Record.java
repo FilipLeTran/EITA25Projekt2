@@ -4,7 +4,7 @@ public class Record {
 	private User doctor;
 	private User patient;
 	private User nurse;
-	private static String data;
+	private String data;
 	//private static int lastEdited;
 
 	public Record(User doctor, User patient, User nurse, Division division){

@@ -17,12 +17,12 @@ public class OperationHandler {
 		    				if(user.getRole() == Role.ADMIN) {
 		    					return addUser(input.substring(input.indexOf(operations[2])));
 		    				}
-		    				return "Access denied";
+		    				return "Permission denied";
 		    			case "record":
 		    				if(user.getRole() == Role.DOCTOR || user.getRole() == Role.ADMIN) {
 		    					return addRecord(user, operations[2], input.substring(input.indexOf(operations[3])));
 		    				}
-		    				return "Access denied";
+		    				return "Permission denied";
 		    		}
 		    	case "list":
 		    		switch(operations[1]) {
@@ -60,10 +60,10 @@ public class OperationHandler {
     
     private static String openRecord(User user, String recordname) {
     	Record record = Server.records.get(recordname);
-    	String recordString = "No record found.";
+    	String recordString = "Permission denied.";
     	if(record.getPermissions(user).contains("r")) {
     		recordString = "-----------------------------------\n";
-			recordString+=record.toString() + "-----------------------------------\n";
+			recordString+=record.toString() + "-----------------------------------";
 		}
     	return recordString;
     }
@@ -75,7 +75,7 @@ public class OperationHandler {
     			recordString+=record.toString() + "-----------------------------------\n";
     		}
     	}
-    	return recordString;
+    	return recordString.substring(0, recordString.length()-2);
     }
     
     private static String addUser(String data) {
