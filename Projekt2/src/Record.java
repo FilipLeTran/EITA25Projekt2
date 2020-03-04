@@ -4,21 +4,22 @@ public class Record {
 	private User doctor;
 	private User patient;
 	private User nurse;
+	private String recordname;
 	private String data;
 	//private static int lastEdited;
 
-	public Record(User doctor, User patient, User nurse, Division division){
+	public Record(User doctor, User patient, User nurse, String recordname){
 		this.doctor = doctor;
 		this.patient = patient;
 		this.nurse = nurse;
-		this.division = division;
+		this.division = doctor.getDivision();
 	}
 	
-	public Record(User doctor, User patient, User nurse, String data){
+	public Record(User doctor, User patient, User nurse, String recordname, String data){
 		this.doctor = doctor;
 		this.patient = patient;
 		this.nurse = nurse;
-		this.division = division;
+		this.division = doctor.getDivision();
 		this.data = data;
 	}
 
@@ -43,7 +44,7 @@ public class Record {
 			case ADMIN:
 				return "rw";
 			case GOV:
-				return "rw";
+				return "r";
 			case DOCTOR:
 				if(user.getDivision() == division){
 					return "rw";
@@ -52,6 +53,8 @@ public class Record {
 			case NURSE:
 				if(user.getUsername().equals(nurse.getUsername())){
 					return "rw";
+				} else if(user.getDivision() == nurse.getDivision()) {
+					return "r";
 				}
 				return "";
 			case PATIENT:

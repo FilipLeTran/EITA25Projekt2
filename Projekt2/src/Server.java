@@ -13,17 +13,21 @@ public class Server implements Runnable {
     public static HashMap<String, User> users;
     public static HashMap<String, Record> records;
     private static int numConnectedClients = 0;
+    public static Log serverLog;
 
     public Server(ServerSocket ss) throws IOException {
         serverSocket = ss;
         users = new HashMap<>();
         records = new HashMap<>();
-        users.put("Admin", new User("Admin", "Admin Admin", Role.ADMIN));
-        users.put("nurse", new User("nurse", "Eva Olofsson", Role.NURSE));
-        users.put("patient", new User("patient", "Rolf", Role.PATIENT));
-        users.put("testare", new User("testare", "Jan Jansson", Role.PATIENT));
-        records.put("r1", new Record(users.get("Admin"), users.get("patient"), users.get("nurse"), "Bruten tumme"));
-        records.put("r2", new Record(users.get("Admin"), users.get("testare"), users.get("nurse"), "Influense"));
+        users.put("admin", new User("admin", "Admin Admin", Role.ADMIN, Division.MISC));
+        users.put("nurse", new User("nurse", "Eva Olofsson", Role.NURSE, Division.SURGERY));
+        users.put("patient", new User("patient", "Rolf", Role.PATIENT, Division.SURGERY));
+        users.put("patient2", new User("patient2", "Adam", Role.PATIENT, Division.MEDICINE));
+        users.put("doctor", new User("doctor", "Jan Jansson", Role.DOCTOR, Division.MEDICINE));
+        users.put("testare", new User("testare", "Testare", Role.NURSE, Division.MEDICINE));
+        records.put("r1", new Record(users.get("admin"), users.get("patient"), users.get("nurse"), "Rolfs journal"));
+        records.put("r2", new Record(users.get("admin"), users.get("testare"), users.get("nurse"), "Jans journal"));
+        serverLog = new Log("log.txt");
         newListener();
     }
 
@@ -49,14 +53,14 @@ public class Server implements Runnable {
             PrintWriter out = null;
             BufferedReader in = null;
             out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             if(killsession) {
             	out.println("Connection dropped. You have not yet been added to the server whitelist.");
             	out.flush();
             	return;
-            } else {
-            	out.println("Welcome, " + user.getUsername() + "!");
             }
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out.println("Welcome, " + user.getUsername() + "!");
+            
             String clientInput = null;
             while ((clientInput = in.readLine()) != null) {
 					out.println(OperationHandler.handleInput(user, clientInput));

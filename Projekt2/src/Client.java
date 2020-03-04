@@ -93,7 +93,7 @@ public class Client {
                 System.out.println("done");
                 System.out.println(in.readLine());
                 while(in.ready()) {
-                    System.out.println(in.readLine());
+                    System.out.println('"' + in.readLine() + '"');
                }
             }
             in.close();

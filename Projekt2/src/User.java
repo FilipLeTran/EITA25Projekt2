@@ -5,10 +5,11 @@ public class User {
 	private Role role;
 	private Division division;
 	
-	public User(String username, String fullname, Role role) {
+	public User(String username, String fullname, Role role, Division division) {
 		this.username = username;
 		this.fullname = fullname;
-		this.role = role;		
+		this.role = role;
+		this.division = division;
 	}
 	
 	public String getUsername() {

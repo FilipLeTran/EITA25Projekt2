@@ -14,15 +14,9 @@ public class OperationHandler {
 		    	case "add":
 		    		switch(operations[1]) {
 		    			case "user":
-		    				if(user.getRole() == Role.ADMIN) {
-		    					return addUser(input.substring(input.indexOf(operations[2])));
-		    				}
-		    				return "Permission denied";
+		    				return addUser(user, input.substring(input.indexOf(operations[2])));
 		    			case "record":
-		    				if(user.getRole() == Role.DOCTOR || user.getRole() == Role.ADMIN) {
-		    					return addRecord(user, operations[2], input.substring(input.indexOf(operations[3])));
-		    				}
-		    				return "Permission denied";
+		    				return addRecord(user, operations[2], input.substring(input.indexOf(operations[3])));
 		    		}
 		    	case "list":
 		    		switch(operations[1]) {
@@ -43,15 +37,19 @@ public class OperationHandler {
 	// Skriver över andra records??
     private static String addRecord(User user, String recordname, String data) {
     	try {
-    		String[] inputs = data.split(" ");
-	    	User patient = Server.getUser(inputs[0]);
-	    	User nurse = Server.getUser(inputs[1]);
-	    	if(patient == null || nurse == null) {
-	    		return "User not found.";
-	    	}
-	    	String text = inputs[2];
-	    	Server.records.put(recordname, new Record(user, patient, nurse, text)); 
-	    	return "Record added successfully.";
+    		if(user.getRole() == Role.DOCTOR || user.getRole() == Role.ADMIN) {
+	    		String[] inputs = data.split(" ");
+		    	User patient = Server.getUser(inputs[0]);
+		    	User nurse = Server.getUser(inputs[1]);
+		    	if(patient == null || nurse == null) {
+		    		return "User not found.";
+		    	}
+		    	String text = inputs[2];
+		    	Server.records.put(recordname, new Record(user, patient, nurse, recordname, text));
+		    	Server.serverLog.newEntry(user.getUsername() + " added record " + recordname);
+		    	return "Record added successfully.";
+    		}
+    		return "Permission denied";
     	} catch(Exception e) {
     		e.printStackTrace();
     		return "Input error.";
@@ -60,11 +58,17 @@ public class OperationHandler {
     
     private static String openRecord(User user, String recordname) {
     	Record record = Server.records.get(recordname);
-    	String recordString = "Permission denied.";
+    	String recordString;
+    	String logEntry;
     	if(record.getPermissions(user).contains("r")) {
     		recordString = "-----------------------------------\n";
 			recordString+=record.toString() + "-----------------------------------";
+			logEntry = user.getUsername() + " opened record " + recordname;
+		} else {
+			recordString = "Permission denied.";
+			logEntry = user.getUsername() + " tried to open " + recordname + ". Permission denied.";
 		}
+    	Server.serverLog.newEntry(logEntry);
     	return recordString;
     }
     
@@ -75,12 +79,16 @@ public class OperationHandler {
     			recordString+=record.toString() + "-----------------------------------\n";
     		}
     	}
+    	Server.serverLog.newEntry(user.getUsername() + " used the list records command.");
     	return recordString.substring(0, recordString.length()-2);
     }
     
-    private static String addUser(String data) {
+    private static String addUser(User user, String data) {
     	// username Lastname,Firstname role
     	try {
+    		if(user.getRole() != Role.ADMIN) {
+    			return "Permission denied.";
+    		}
     		String[] inputs = data.split(" ");
     		for(String s : inputs) {
     			System.out.println(s);
@@ -88,6 +96,7 @@ public class OperationHandler {
 	        String username = inputs[0];
 	        String fullname = inputs[1];
 	        String rolestr = inputs[2];
+	        String divisionstr = inputs[3];
 	        Role role;
 	        switch(rolestr) {
 				case "patient":
@@ -109,7 +118,26 @@ public class OperationHandler {
 					return "Please enter a valid role.";
 					
 	        }
-	        Server.users.put(username, new User(username, fullname, role));
+	        Division division;
+	        switch(divisionstr) {
+			case "medicine":
+				division = Division.MEDICINE;
+				break;
+			case "nurse":
+				division = Division.NEUROLOGY;
+				break;
+			case "doctor":
+				division = Division.SURGERY;
+				break;
+			case "gov":
+				division = Division.RADIOLOGY;
+				break;
+			default:
+				return "Please enter a valid division.";
+				
+        }
+	        Server.users.put(username, new User(username, fullname, role, division));
+	    	Server.serverLog.newEntry(user.getUsername() + " added user " + username + " (" + role + ").");
 	        return "User added successfully.";
     	} catch(Exception e){
         	e.printStackTrace();

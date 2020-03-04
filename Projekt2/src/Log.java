@@ -7,12 +7,6 @@ import java.io.IOException;
 public class Log {
 	private File file;
 	
-	public static void main(String[] args) {
-		Log myLog = new Log("log.txt");
-		myLog.newEntry("Record 1", "Swiper", "2020-01-14", "Ruined everything");
-		myLog.printLog();
-	}
-	
 	public Log(String fileName) {
 		try {
 			file = new File(fileName);
@@ -28,14 +22,12 @@ public class Log {
 		
 	}
 
-	public void newEntry(String record, String date, String editor, String edit) {
+	public void newEntry(String entry) {
 		try {
-			FileWriter writer = new FileWriter(file.getName());
-			writer.append("blabla");
-			writer.write(record + " " + editor + " " + date + " " + edit);
+			FileWriter writer = new FileWriter(file.getName(), true);
+			writer.append(entry+"\n");
 			writer.flush();
 			writer.close();
-			System.out.println("we done");
 		} catch (IOException e) {
 			System.out.println("An error occurred concerning filewriter.");
 		}
