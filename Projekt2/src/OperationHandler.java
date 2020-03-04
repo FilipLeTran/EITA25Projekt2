@@ -70,7 +70,16 @@ public class OperationHandler {
 		}
     	Server.serverLog.newEntry(logEntry);
     	return recordString;
-    }
+	}
+	
+	private static String removeRecord(User user, String recordName){
+		Record record = Server.records.get(recordName);
+		String recordString
+		String logEntry;
+		if(record.getPermissions(user).contains("d")) {
+
+		}
+	}
     
     private static String listRecords(User user) {
     	String recordString = "-----------------------------------\n";
