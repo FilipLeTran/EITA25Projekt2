@@ -27,6 +27,23 @@ public class User {
 	public Division getDivision() {
 		return division;
 	}
+	
+	public String getPermittedOperations() {
+		switch(role) {
+			case PATIENT:
+				return "";
+			case NURSE:
+				return "";
+			case DOCTOR:
+				return "a";
+			case GOV:
+				return "d";
+			case ADMIN:
+				return "ad";
+			default:
+				return "";
+		}
+	}
 
 	public String toString() {
 		return username + ": " + fullname + ", " + role; 

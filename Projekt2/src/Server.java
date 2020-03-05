@@ -19,14 +19,20 @@ public class Server implements Runnable {
         serverSocket = ss;
         users = new HashMap<>();
         records = new HashMap<>();
-        users.put("admin", new User("admin", "Admin Admin", Role.ADMIN, Division.MISC));
-        users.put("nurse", new User("nurse", "Eva Olofsson", Role.NURSE, Division.SURGERY));
-        users.put("patient", new User("patient", "Rolf", Role.PATIENT, Division.SURGERY));
-        users.put("patient2", new User("patient2", "Adam", Role.PATIENT, Division.MEDICINE));
-        users.put("doctor", new User("doctor", "Jan Jansson", Role.DOCTOR, Division.MEDICINE));
-        users.put("testare", new User("testare", "Testare", Role.NURSE, Division.MEDICINE));
-        records.put("r1", new Record(users.get("admin"), users.get("patient"), users.get("nurse"), "Rolfs journal"));
-        records.put("r2", new Record(users.get("admin"), users.get("testare"), users.get("nurse"), "Jans journal"));
+        users.put("nurse", new User("nurse", "Eva Sadu", Role.NURSE, Division.MEDICINE));
+        users.put("nurse2", new User("nurse2", "Martin Mattson", Role.NURSE, Division.SURGERY));
+        users.put("patient", new User("patient", "Rolf Roffino", Role.PATIENT, Division.SURGERY));
+        users.put("patient2", new User("patient2", "Adam Dam", Role.PATIENT, Division.MEDICINE));
+        users.put("patient3", new User("patient3", "Rebecca Snäcka", Role.PATIENT, Division.RADIOLOGY));
+        users.put("doctor", new User("doctor", "Dr. Jan Jansson", Role.DOCTOR, Division.MEDICINE));
+        users.put("doctor2", new User("doctor2", "Dr. Heja Hooa", Role.DOCTOR, Division.SURGERY));
+        users.put("agent", new User("agent", "John Smith", Role.GOV, Division.MISC));
+
+        users.put("testare", new User("testare", "Testare", Role.ADMIN, Division.MISC));
+        Record r1 = new Record(users.get("doctor"), users.get("patient"), users.get("nurse"));
+        Record r2 = new Record(users.get("doctor2"), users.get("patient2"), users.get("nurse2"));
+        records.put(r1.getRecordID(), r1);
+        records.put(r2.getRecordID(), r2);
         serverLog = new Log("log.txt");
         newListener();
     }

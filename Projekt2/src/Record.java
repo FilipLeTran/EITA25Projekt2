@@ -1,28 +1,26 @@
+import java.util.UUID;
 
 public class Record {
 	private Division division;
 	private User doctor;
 	private User patient;
 	private User nurse;
-	private String recordname;
+	private String recordID;
 	private String data;
-	//private static int lastEdited;
 
-	public Record(User doctor, User patient, User nurse, String recordname){
+	public Record(User doctor, User patient, User nurse){
 		this.doctor = doctor;
 		this.patient = patient;
 		this.nurse = nurse;
 		this.division = doctor.getDivision();
+		this.recordID = UUID.randomUUID().toString().substring(0,8);
+		data = "";
+	}
+
+	public String getRecordID() {
+		return recordID;
 	}
 	
-	public Record(User doctor, User patient, User nurse, String recordname, String data){
-		this.doctor = doctor;
-		this.patient = patient;
-		this.nurse = nurse;
-		this.division = doctor.getDivision();
-		this.data = data;
-	}
-
 	public String getData(){
 		return data;		
 	}
@@ -31,29 +29,29 @@ public class Record {
 		return division;
 	}
 	
-	/* public int getLastEdited(){
-		return lastEdited;
-	} */
+	public String getPatientName() {
+		return patient.getFullname();
+	}
 	
-	public void setData(User user, String newData){
-		data = data + "\n" + newData;
+	public void appendData(String newData){
+		data+= "\n" + newData;
 	}
 
 	public String getPermissions(User user){
 		switch(user.getRole()){
 			case ADMIN:
-				return "rw";
+				return "rwd";
 			case GOV:
-				return "r";
+				return "rd";
 			case DOCTOR:
-				if(user.getDivision() == division){
+				if(user.getDivision().equals(division)){
 					return "rw";
 				}
 				return "";
 			case NURSE:
 				if(user.getUsername().equals(nurse.getUsername())){
 					return "rw";
-				} else if(user.getDivision() == nurse.getDivision()) {
+				} else if(user.getDivision().equals(division)) {
 					return "r";
 				}
 				return "";
@@ -68,7 +66,7 @@ public class Record {
 	}
 	
 	public String toString() {
-		return "Patient: " + patient.getFullname() +"\nDoctor: " + doctor.getFullname() + "\nNurse: " + nurse.getFullname() + "\n" + data + "\n";
+		return "Record ID: " + recordID + "\nPatient: " + patient.getFullname() +"\nDoctor: " + doctor.getFullname() + "\nNurse: " + nurse.getFullname() + "\nDivision: " + division + "\n" + data;
 	}
 
 }

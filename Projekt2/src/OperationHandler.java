@@ -9,14 +9,16 @@ public class OperationHandler {
 	    	switch(operations[0]) {
 		    	case "open":
 		    		return openRecord(user, operations[1]);
-		    	case "remove":
-		    		return "Failed remove operation";
+		    	case "delete":
+		    		return deleteRecord(user, operations[1]);
+		    	case "write":
+		    		return writeToRecord(user, operations[1], input.substring(input.indexOf(operations[2])));
 		    	case "add":
 		    		switch(operations[1]) {
 		    			case "user":
 		    				return addUser(user, input.substring(input.indexOf(operations[2])));
 		    			case "record":
-		    				return addRecord(user, operations[2], input.substring(input.indexOf(operations[3])));
+		    				return addRecord(user, input.substring(input.indexOf(operations[2])));
 		    		}
 		    	case "list":
 		    		switch(operations[1]) {
@@ -33,23 +35,22 @@ public class OperationHandler {
     	
     }
     
-	// TODO fixa så att denna metod kan hantera data utan ett textfält.
-	// Skriver över andra records??
-    private static String addRecord(User user, String recordname, String data) {
+    private static String addRecord(User user, String data) {
     	try {
-    		if(user.getRole() == Role.DOCTOR || user.getRole() == Role.ADMIN) {
-	    		String[] inputs = data.split(" ");
-		    	User patient = Server.getUser(inputs[0]);
-		    	User nurse = Server.getUser(inputs[1]);
-		    	if(patient == null || nurse == null) {
-		    		return "User not found.";
-		    	}
-		    	String text = inputs[2];
-		    	Server.records.put(recordname, new Record(user, patient, nurse, recordname, text));
-		    	Server.serverLog.newEntry(user.getUsername() + " added record " + recordname);
-		    	return "Record added successfully.";
+    		if(!user.getPermittedOperations().contains("a")) {
+    	    	Server.serverLog.newEntry(user.getUsername() + " tried to add a record. Permission denied");
+    			return "Permission denied";
     		}
-    		return "Permission denied";
+	    	String[] inputs = data.split(" ");
+		   	User patient = Server.getUser(inputs[0]);
+		   	User nurse = Server.getUser(inputs[1]);
+		   	if(patient == null || nurse == null) {
+		   		return "User not found.";
+		   	}
+		   	Record r = new Record(user, patient, nurse);
+	    	Server.records.put(r.getRecordID(), r);
+	    	Server.serverLog.newEntry(user.getUsername() + " added record " + r.getRecordID());
+		    return "Record added successfully.";
     	} catch(Exception e) {
     		e.printStackTrace();
     		return "Input error.";
@@ -62,7 +63,7 @@ public class OperationHandler {
     	String logEntry;
     	if(record.getPermissions(user).contains("r")) {
     		recordString = "-----------------------------------\n";
-			recordString+=record.toString() + "-----------------------------------";
+			recordString+=record.toString() + "\n-----------------------------------";
 			logEntry = user.getUsername() + " opened record " + recordname;
 		} else {
 			recordString = "Permission denied.";
@@ -71,23 +72,42 @@ public class OperationHandler {
     	Server.serverLog.newEntry(logEntry);
     	return recordString;
 	}
+    
+    private static String writeToRecord(User user, String recordName, String data) {
+    	Record record = Server.records.get(recordName);
+    	if(!record.getPermissions(user).contains("w")) {
+    		Server.serverLog.newEntry(user.getUsername() + " tried to write to record " + recordName + ". Permission denied.");
+    		return "Permission denied.";
+    	} else {
+    		record.appendData(data);
+			Server.serverLog.newEntry(user.getUsername() + " wrote " + '"' + data + '"' + " to record " + recordName);
+			return "Success.";
+    	}
+    }
 	
-	private static String removeRecord(User user, String recordName){
+	private static String deleteRecord(User user, String recordName){
 		Record record = Server.records.get(recordName);
-		String recordString
-		String logEntry;
-		if(record.getPermissions(user).contains("d")) {
-
+		
+		if(!user.getPermittedOperations().contains("d")) {
+			Server.serverLog.newEntry(user.getUsername() + " tried deleting record " + recordName + ". Permission denied.");
+			return "Permission denied.";
+		} else if(record == null) {
+			return "No such record.";
+		} else {
+			Server.records.remove(recordName);
+			Server.serverLog.newEntry(user.getUsername() + " deleted record " + recordName);
+			return "Record deleted successfully";
 		}
 	}
     
     private static String listRecords(User user) {
-    	String recordString = "-----------------------------------\n";
+    	String recordString = "Available records:\n--------------------------------------------\n";
     	for(Record record : Server.records.values()) {
     		if(record.getPermissions(user).contains("r")) {
-    			recordString+=record.toString() + "-----------------------------------\n";
+    			recordString+= "Record ID: " + record.getRecordID() + "    Patient: " + record.getPatientName() + "\n";
     		}
     	}
+    	recordString+="--------------------------------------------";
     	Server.serverLog.newEntry(user.getUsername() + " used the list records command.");
     	return recordString.substring(0, recordString.length()-2);
     }
@@ -95,8 +115,8 @@ public class OperationHandler {
     private static String addUser(User user, String data) {
     	// username Lastname,Firstname role
     	try {
-    		if(user.getRole() != Role.ADMIN) {
-    			return "Permission denied.";
+    		if(!user.getPermittedOperations().contains("a")) {
+    			return "Permission denied";
     		}
     		String[] inputs = data.split(" ");
     		for(String s : inputs) {
