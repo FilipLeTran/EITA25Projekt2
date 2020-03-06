@@ -25,6 +25,15 @@ public class OperationHandler {
 		    			case "records":
 		    				return listRecords(user);
 		    		}
+		    	case "help":
+		    		return "Available operations:\n"
+		    				+ "-----------------------------------\n"
+		    				+ "list records\n"
+		    				+ "open [record_ID]\n"
+		    				+ "delete [record_ID]\n"
+		    				+ "write [record_ID] [input]\n"
+		    				+ "add [record_ID] [patient] [nurse]\n"
+		    				+ "-----------------------------------\n";
 		    	default:
 		    		return "Unspecified operation.";
 	    	}
