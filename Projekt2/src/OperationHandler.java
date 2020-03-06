@@ -96,7 +96,7 @@ public class OperationHandler {
 		} else {
 			Server.records.remove(recordName);
 			Server.serverLog.newEntry(user.getUsername() + " deleted record " + recordName);
-			return "Record deleted successfully";
+			return "Record deleted successfully.";
 		}
 	}
     
@@ -104,7 +104,7 @@ public class OperationHandler {
     	String recordString = "Available records:\n--------------------------------------------\n";
     	for(Record record : Server.records.values()) {
     		if(record.getPermissions(user).contains("r")) {
-    			recordString+= "Record ID: " + record.getRecordID() + "    Patient: " + record.getPatientName() + "\n";
+    			recordString+= "Record ID: " + record.getRecordID() + "   Patient: " + record.getPatientName() + "   Permissions: " + record.getPermissions(user) +"\n";
     		}
     	}
     	recordString+="--------------------------------------------";
